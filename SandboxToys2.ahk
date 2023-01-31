@@ -610,9 +610,9 @@ BuildMainMenu:
     Menu, SBMenuSetup, Add, Large sub-menu icons?, SetupMenuMenuHandler2
     if (smalliconsize > 16)
         Menu, SBMenuSetup, Check, Large sub-menu icons?
-    Menu, SBMenuSetup, Add, Seperated All Users menus?, SetupMenuMenuHandler3
+    Menu, SBMenuSetup, Add, Separate All Users Start menus?, SetupMenuMenuHandler3
     if (seperatedstartmenus)
-        Menu, SBMenuSetup, Check, Seperated All Users menus?
+        Menu, SBMenuSetup, Check, Separate All Users Start menus?
     Menu, SBMenuSetup, Add
     Menu, SBMenuSetup, Add, Include [#BoxName] in shortcut names?, SetupMenuMenuHandler4
     if (includeboxnames)
@@ -4592,10 +4592,10 @@ Return
 SetupMenuMenuHandler3:
     if (seperatedstartmenus) {
         seperatedstartmenus = 0
-        Menu, SBMenuSetup, UnCheck, Seperated All Users menus?
+        Menu, SBMenuSetup, UnCheck, Separate All Users Start menus?
     } else {
         seperatedstartmenus = 1
-        Menu, SBMenuSetup, Check, Seperated All Users menus?
+        Menu, SBMenuSetup, Check, Separate All Users Start menus?
     }
     IniWrite, %seperatedstartmenus%, %sbtini%, AutoConfig, SeperatedStartMenus
 Return
