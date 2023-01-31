@@ -44,6 +44,9 @@ trayiconfile =
 trayiconnumber = 1
 sbcommandpromptdir = `%userprofile`%
 
+EnvGet, usrname_underscored, USERNAME
+StringReplace, usrname_underscored, usrname_underscored, %A_SPACE%, _, All
+EnvSet, sbt_username, %usrname_underscored%
 
 inidir       = %A_ScriptDir%
 sbtini       = %A_ScriptDir%\%nameNoExt%.ini
@@ -969,11 +972,11 @@ setIconFromSandboxedShortcut(box, shortcut, menuname, label, iconsize)
         }
         ; try to get the icon from the sandboxed registry first
         ; (will fail is nothing is running in the sandbox)
-        RegRead, defaulticon, HKEY_USERS, Sandbox_%username%_%box%\machine\software\classes\.%extension%\DefaultIcon,
+        RegRead, defaulticon, HKEY_USERS, Sandbox_%sbt_username%_%box%\machine\software\classes\.%extension%\DefaultIcon,
         if (defaulticon == "") {
-            RegRead, keyval, HKEY_USERS, Sandbox_%username%_%box%\machine\software\classes\.%extension%,
+            RegRead, keyval, HKEY_USERS, Sandbox_%sbt_username%_%box%\machine\software\classes\.%extension%,
             if (keyval != "") {
-                RegRead, defaulticon, HKEY_USERS, Sandbox_%username%_%box%\machine\software\classes\%keyval%\DefaultIcon,
+                RegRead, defaulticon, HKEY_USERS, Sandbox_%sbt_username%_%box%\machine\software\classes\%keyval%\DefaultIcon,
             }
         }
         if (defaulticon != "") {
@@ -1500,7 +1503,9 @@ expandEnvVars(str)
     global SID, SESSION
     StringReplace, str, str, `%SID`%, %SID%, All
     StringReplace, str, str, `%SESSION`%, %SESSION%, All
-    StringReplace, str, str, `%USER`%, %username%, All
+    EnvGet, usrname_underscored, USERNAME
+    StringReplace, usrname_underscored, usrname_underscored, %A_SPACE%, _, All
+    StringReplace, str, str, `%USER`%, %usrname_underscored%, All
 
     if sz:=DllCall("ExpandEnvironmentStrings", "uint", &str
                     , "uint", 0, "uint", 0)
@@ -1723,7 +1728,7 @@ InitializeBox(box)
     Run %start% /box:%box% run_dialog, , HIDE UseErrorLevel, run_pid
 
     ; wait til the registry hive has been loaded in the global registry
-    boxkeypath = Sandbox_%username%_%box%\user\current\software\SandboxieAutoExec
+    boxkeypath = Sandbox_%sbt_username%_%box%\user\current\software\SandboxieAutoExec
     loop, 100
     {
         sleep, 50
@@ -2350,7 +2355,7 @@ GuiLVCurrentOpenRegEdit(row, box)
     run_pid := InitializeBox(box)
     ; pre-select the right registry key
     LV_GetText(LVRegPath, row, 7)
-    key = HKEY_USERS\Sandbox_%username%_%box%\%LVRegPath%
+    key = HKEY_USERS\Sandbox_%sbt_username%_%box%\%LVRegPath%
     RegWrite, REG_SZ, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Applets\Regedit, LastKey, %key%
     ; launch regedit
     RunWait, RegEdit.exe, , UseErrorLevel
@@ -2759,7 +2764,7 @@ GuiLVRegistrySaveAsReg(box)
     A_Quotes = "
     A_nl = `n
 
-    mainsbkey = Sandbox_%username%_%box%
+    mainsbkey = Sandbox_%sbt_username%_%box%
 
     numregs := numOfCheckedFiles()
     if (numregs == 0)
@@ -3065,7 +3070,7 @@ MakeRegConfig(box, filename="")
     global regconfig
     run_pid := InitializeBox(box)
 
-    mainsbkey = Sandbox_%username%_%box%
+    mainsbkey = Sandbox_%sbt_username%_%box%
     mainsbkeylen := StrLen(mainsbkey) + 2
 
     outtxt =
@@ -3100,7 +3105,7 @@ SearchReg(box, ignoredKeys, ignoredValues, filename="")
 
     run_pid := InitializeBox(box)
 
-    mainsbkey = Sandbox_%username%_%box%
+    mainsbkey = Sandbox_%sbt_username%_%box%
     mainsbkeylen := StrLen(mainsbkey) + 2
 
     if (filename == "")
@@ -3404,36 +3409,36 @@ ListAutostarts(box, path)
     autostarts =
 
     ; check RunOnce keys
-    key = Sandbox_%username%_%box%\machine\Software\Microsoft\Windows\CurrentVersion\RunOnce
+    key = Sandbox_%sbt_username%_%box%\machine\Software\Microsoft\Windows\CurrentVersion\RunOnce
     location = HKLM RunOnce
     autostarts := autostarts . SearchAutostart(box, key, location, 0)
     
-    key = Sandbox_%username%_%box%\machine\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+    key = Sandbox_%sbt_username%_%box%\machine\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
     location = HKLM RunOnce
     autostarts := autostarts . SearchAutostart(box, key, location, 0)
 
-    key = Sandbox_%username%_%box%\user\current\Software\Microsoft\Windows\CurrentVersion\RunOnce
+    key = Sandbox_%sbt_username%_%box%\user\current\Software\Microsoft\Windows\CurrentVersion\RunOnce
     location = HKCU RunOnce
     autostarts := autostarts . SearchAutostart(box, key, location, 0)
     
-    key = Sandbox_%username%_%box%\user\current\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
+    key = Sandbox_%sbt_username%_%box%\user\current\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnce
     location = HKCU RunOnce
     autostarts := autostarts . SearchAutostart(box, key, location, 0)
 
     ; check Run keys
-    key = Sandbox_%username%_%box%\machine\Software\Microsoft\Windows\CurrentVersion\Run
+    key = Sandbox_%sbt_username%_%box%\machine\Software\Microsoft\Windows\CurrentVersion\Run
     location = HKLM Run
     autostarts := autostarts . SearchAutostart(box, key, location, 1)
     
-    key = Sandbox_%username%_%box%\machine\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+    key = Sandbox_%sbt_username%_%box%\machine\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
     location = HKLM Run
     autostarts := autostarts . SearchAutostart(box, key, location, 1)
 
-    key = Sandbox_%username%_%box%\user\current\Software\Microsoft\Windows\CurrentVersion\Run
+    key = Sandbox_%sbt_username%_%box%\user\current\Software\Microsoft\Windows\CurrentVersion\Run
     location = HKCU Run
     autostarts := autostarts . SearchAutostart(box, key, location, 1)
     
-    key = Sandbox_%username%_%box%\user\current\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
+    key = Sandbox_%sbt_username%_%box%\user\current\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run
     location = HKCU Run
     autostarts := autostarts . SearchAutostart(box, key, location, 1)
 
@@ -4436,7 +4441,7 @@ URegEditMenuHandler:
         ; ensure that the box is in use, or the hive will not be loaded
         run_pid := InitializeBox(box)
         ; pre-select the right registry key
-        RegWrite, REG_SZ, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Applets\Regedit, LastKey, HKEY_USERS\Sandbox_%username%_%box%
+        RegWrite, REG_SZ, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Applets\Regedit, LastKey, HKEY_USERS\Sandbox_%sbt_username%_%box%
         ; launch regedit
         RunWait, RegEdit.exe, , UseErrorLevel
         ReleaseBox(run_pid)
@@ -4525,7 +4530,7 @@ Return
 WatchRegMenuHandler:
     box := getBoxFromMenu()
     path := sandboxes_array[box,"path"]
-    comparefile = %temp%\sandbox_%username%_%box%_reg_compare.cfg
+    comparefile = %temp%\sandbox_%sbt_username%_%box%_reg_compare.cfg
     MakeRegConfig(box, comparefile)
     MsgBox, 38, %title%, The current state of the registry of sandbox "%box%" has been saved.`n`nYou can now work in the box.  When finished`, click Continue, and the new state of the registry will be compared with the old state`, and the result displayed so that you can analyse the changes`, and export them as a REG file if you wish.`n`nNote that the registry keys and the deleted registry values will not be listed.  However, a deleted key or value will be listed if it is present in the "real world".`n`n*** Click Continue ONLY when ready! ***
     ifMsgBox Continue
@@ -4537,7 +4542,7 @@ Return
 WatchFilesMenuHandler:
     box := getBoxFromMenu()
     path := sandboxes_array[box,"path"]
-    comparefile = %temp%\sandbox_%username%_%box%_files_compare.cfg
+    comparefile = %temp%\sandbox_%sbt_username%_%box%_files_compare.cfg
     MakeFilesConfig(box, comparefile, path)
     MsgBox, 38, %title%, The current state of the files in sandbox "%box%" has been saved.`n`nYou can now work in the box.  When finished`, click Continue, and the new state of the files will be compared with the old state`, and the result displayed so that you can analyse the changes`, and export the modified or new files if you wish.`n`nNote that the folders and the deleted files will not be listed.  However, a deleted folder or file will be listed if it is present in the "real world".`n`n*** Click Continue ONLY when ready! ***
     ifMsgBox Continue
@@ -4549,9 +4554,9 @@ Return
 WatchFilesRegMenuHandler:
     box := getBoxFromMenu()
     path := sandboxes_array[box,"path"]
-    comparefile1 = %temp%\sandbox_%username%_%box%_files_compare.cfg
+    comparefile1 = %temp%\sandbox_%sbt_username%_%box%_files_compare.cfg
     MakeFilesConfig(box, comparefile1, path)
-    comparefile2 = %temp%\sandbox_%username%_%box%_reg_compare.cfg
+    comparefile2 = %temp%\sandbox_%sbt_username%_%box%_reg_compare.cfg
     MakeRegConfig(box, comparefile2)
     MsgBox, 38, %title%, The current state of the files and registry of sandbox "%box%" has been saved.`n`nYou can now work in the box.  When finished`, click Continue, and the new state of the files and registry will be compared with the old state`, and the result displayed so that you can analyse the changes.`n`nNote that the folders, the deleted files, the registry keys and the deleted registry values will not be listed.  However, a deleted folder, file, key or value will be listed if it is present in the "real world".`n`n*** Click Continue ONLY when ready! ***
     ifMsgBox Continue
