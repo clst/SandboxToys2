@@ -39,6 +39,7 @@ smalliconsize = 16  ; other icons
 largeiconsize = 32  ; sandbox icons
 seperatedstartmenus = 0
 includeboxnames = 1
+sortboxnames = 1
 trayiconfile =
 trayiconnumber = 1
 sbcommandpromptdir = `%userprofile`%
@@ -67,6 +68,7 @@ if (FileExist(sbtini)) {
     IniRead, smalliconsize,       %sbtini%, AutoConfig, SmallIconSize,       %smalliconsize%
     IniRead, seperatedstartmenus, %sbtini%, AutoConfig, SeperatedStartMenus, %seperatedstartmenus%
     IniRead, includeboxnames,     %sbtini%, AutoConfig, IncludeBoxNames,     %includeboxnames%
+    IniRead, sortboxnames,        %sbtini%, AutoConfig, SortBoxNames,        %sortboxnames%
     IniRead, trayiconfile,        %sbtini%, UserConfig, TrayIconFile,        %trayiconfile%
     IniRead, trayiconnumber,      %sbtini%, UserConfig, TrayIconNumber,      %trayiconnumber%
     IniRead, sbcommandpromptdir,  %sbtini%, UserConfig, SandboxedCommandPromptDir, %sbcommandpromptdir%
@@ -77,6 +79,7 @@ else
     IniWrite, %smalliconsize%,       %sbtini%, AutoConfig, SmallIconSize
     IniWrite, %seperatedstartmenus%, %sbtini%, AutoConfig, SeperatedStartMenus
     IniWrite, %includeboxnames%,     %sbtini%, AutoConfig, IncludeBoxNames
+    IniWrite, %sortboxnames%,        %sbtini%, AutoConfig, SortBoxNames
     IniWrite, %trayiconfile%,        %sbtini%, UserConfig, TrayIconFile
     IniWrite, %trayiconnumber%,      %sbtini%, UserConfig, TrayIconNumber
     IniWrite, %sbcommandpromptdir%,  %sbtini%, UserConfig, SandboxedCommandPromptDir
@@ -640,6 +643,8 @@ Return
 ; Returns the number of sandboxes.
 getSandboxesArray(array,ini)
 {
+    global sortboxnames
+
     IniRead, sandboxes_path, %ini%, GlobalSettings, FileRootPath, %systemdrive%\Sandbox\`%USER`%\`%SANDBOX`%
     sandboxes_path := expandEnvVars(sandboxes_path)
 
@@ -657,7 +662,8 @@ getSandboxesArray(array,ini)
         }
     }
     boxes := Trim(boxes, ",")   ; requires AHK_L
-    Sort, boxes, CL D`,
+    if sortboxnames
+        Sort, boxes, CL D`,
 
     ; Requires AHK_Lw
     FileEncoding, %old_encoding%
