@@ -561,8 +561,8 @@ BuildMainMenu:
             Menu, %box%_ST2MenuTools, Add
             Menu, %box%_ST2MenuTools, Add,  Terminate Sandboxed Programs!, TerminateMenuHandler
             setMenuIcon(box "_ST2MenuTools", "Terminate Sandboxed Programs!", shell32, 220, smalliconsize)
-            Menu, %box%_ST2MenuTools, Add,  Delete Sandbox!, DeleteBoxMenuHandler
-            setMenuIcon(box "_ST2MenuTools", "Delete Sandbox!", shell32, 132, smalliconsize)
+            Menu, %box%_ST2MenuTools, Add,  Delete Sandbox Contents!, DeleteBoxMenuHandler
+            setMenuIcon(box "_ST2MenuTools", "Delete Sandbox Contents!", shell32, 132, smalliconsize)
             Menu, %box%_ST2MenuBox, Add, Tools, :%box%_ST2MenuTools
             setMenuIcon(box "_ST2MenuBox", "Tools", shell32, 36, largeiconsize)
         }
